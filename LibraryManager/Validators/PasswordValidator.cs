@@ -4,7 +4,7 @@ namespace LibraryManager.Validators;
 
 public class PasswordValidator : IValidator<string>
 {
-    public ValidationResult Validate(string password)
+    public ValidationResult Validate(string? password)
     {
         if (string.IsNullOrEmpty(password))
         {

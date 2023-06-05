@@ -31,27 +31,24 @@
 
         <Label Grid.Column="1" Grid.Row="2" Style="{StaticResource InputLabel}" Content="Username:" />
         <TextBox Grid.Column="1" Grid.Row="2" Style="{StaticResource Input}" Text="{Binding Username}" />
-        <TextBlock Grid.Column="1" Grid.Row="2" Style="{StaticResource InputErrorLabel}" VerticalAlignment="Bottom" Text="{Binding ErrorMessageUsername}" />
 
         <Label Grid.Column="2" Grid.Row="2" Style="{StaticResource InputLabel}" Content="Password:" />
         <TextBox Grid.Column="2" Grid.Row="2" Style="{StaticResource Input}" Text="{Binding Password}" />
-        <TextBlock Grid.Column="2" Grid.Row="2" Style="{StaticResource InputErrorLabel}" VerticalAlignment="Bottom" Text="{Binding ErrorMessagePassword}" />
-        
+
         <Label Grid.Column="1" Grid.Row="4" Style="{StaticResource InputLabel}" Content="First name:" />
         <TextBox Grid.Column="1" Grid.Row="4" Style="{StaticResource Input}" Text="{Binding FirstName}" />
-        <TextBlock Grid.Column="1" Grid.Row="4" Style="{StaticResource InputErrorLabel}" VerticalAlignment="Bottom" Text="{Binding ErrorMessageFirstName}" />
-        
+
         <Label Grid.Column="2" Grid.Row="4" Style="{StaticResource InputLabel}" Content="Last name:" />
         <TextBox Grid.Column="2" Grid.Row="4" Style="{StaticResource Input}" Text="{Binding LastName}" />
-        <TextBlock Grid.Column="2" Grid.Row="4" Style="{StaticResource InputErrorLabel}" VerticalAlignment="Bottom" Text="{Binding ErrorMessageLastName}" />
-     
+
         <Label Grid.Column="1" Grid.Row="6" Style="{StaticResource InputLabel}" Content="E-mail:" />
         <TextBox Grid.Column="1" Grid.Row="6" Style="{StaticResource Input}" Text="{Binding Email}" />
-        <TextBlock Grid.Column="1" Grid.Row="6" Style="{StaticResource InputErrorLabel}" VerticalAlignment="Bottom" Text="{Binding ErrorMessageEmail}" />
 
         <Label Grid.Column="2" Grid.Row="6" Style="{StaticResource InputLabel}" Content="Phone:" />
         <TextBox Grid.Column="2" Grid.Row="6" Style="{StaticResource Input}" Text="{Binding Phone}" />
-        <TextBlock Grid.Column="2" Grid.Row="6" Style="{StaticResource InputErrorLabel}" VerticalAlignment="Bottom" Text="{Binding ErrorMessagePhone}" />
+        
+        <TextBlock Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="7" HorizontalAlignment="Center"
+                   VerticalAlignment="Center" FontSize="18" Foreground="Red" Text="{Binding ErrorMessage}" />
 
         <Button Grid.Column="1" Grid.Row="8" Style="{StaticResource SecondaryButton}" HorizontalAlignment="Right"
                 Margin="0 0 20 0" Content="Back to login" Command="{Binding GoToLoginCommand}" />

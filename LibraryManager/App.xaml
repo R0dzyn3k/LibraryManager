@@ -7,7 +7,7 @@
             <Setter Property="FontSize" Value="18" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
-        
+
         <Style x:Key="PageTitle" TargetType="{x:Type Label}">
             <Setter Property="FontSize" Value="32" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -16,7 +16,7 @@
             <Setter Property="FontWeight" Value="Bold" />
 
         </Style>
-        
+
         <Style x:Key="InputLabel" TargetType="{x:Type Label}">
             <Setter Property="FontSize" Value="18" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -31,8 +31,8 @@
             <Setter Property="TextAlignment" Value="Center" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
-        
-        
+
+
         <Style x:Key="Input" TargetType="{x:Type TextBox}">
             <Setter Property="Height" Value="40" />
             <Setter Property="Width" Value="250" />

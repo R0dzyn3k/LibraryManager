@@ -4,7 +4,7 @@ namespace LibraryManager.Validators;
 
 public class FirstNameValidator : IValidator<string>
 {
-    public ValidationResult Validate(string firstName)
+    public ValidationResult Validate(string? firstName)
     {
         if (string.IsNullOrEmpty(firstName))
         {

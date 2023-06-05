@@ -10,10 +10,6 @@ namespace LibraryManager.ViewModel;
 public class MainWindowViewModel : INotifyPropertyChanged
 {
     private readonly LibraryDbContext _dbContext;
-    
-    public LoginViewModel LoginViewModel { get; set; }
-
-    public RegisterViewModel RegisterViewModel { get; set; }
 
     private object _currentView;
 
@@ -27,9 +23,13 @@ public class MainWindowViewModel : INotifyPropertyChanged
         }
     }
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public LoginViewModel LoginViewModel { get; set; }
+
+    public RegisterViewModel RegisterViewModel { get; set; }
 
     public RelayCommand RegisterCommand { get; private set; }
+
+    public event PropertyChangedEventHandler PropertyChanged;
 
     public MainWindowViewModel()
     {
@@ -40,13 +40,14 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
         LoginViewModel = new LoginViewModel(authService);
         LoginViewModel.LoginSuccess += OnLoginSuccess;
-
-        RegisterViewModel = new RegisterViewModel();
+        LoginViewModel.NavigateToRegister += OnNavigateToRegister;
+        
+        RegisterViewModel = new RegisterViewModel(authService);
+        RegisterViewModel.NavigateToLogin += OnNavigateToLogin;
 
         RegisterCommand = new RelayCommand(() => CurrentView = RegisterViewModel);
 
         CurrentView = LoginViewModel;
-        
     }
 
     protected virtual void OnPropertyChanged(string propertyName)
@@ -59,6 +60,14 @@ public class MainWindowViewModel : INotifyPropertyChanged
         // Przełącz na inną stronę po pomyślnym zalogowaniu
         // CurrentView = new SomeOtherViewModel();
     }
+    private void OnNavigateToRegister()
+    {
+        CurrentView = RegisterViewModel;
+    }
     
-
+    private void OnNavigateToLogin()
+    {
+        CurrentView = LoginViewModel;
+    }
+    
 }

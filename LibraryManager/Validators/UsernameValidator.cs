@@ -2,7 +2,7 @@
 
 public class UsernameValidator : IValidator<string>
 {
-    public ValidationResult Validate(string username)
+    public ValidationResult Validate(string? username)
     {
         if (string.IsNullOrEmpty(username))
         {

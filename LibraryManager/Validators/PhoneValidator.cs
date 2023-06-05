@@ -2,9 +2,9 @@
 
 namespace LibraryManager.Validators;
 
-public class PhoneValidator
+public class PhoneValidator : IValidator<string>
 {
-    public ValidationResult Validate(string phone)
+    public ValidationResult Validate(string? phone)
     {
         if (string.IsNullOrEmpty(phone))
         {

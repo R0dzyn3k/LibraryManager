@@ -17,8 +17,8 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.16" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.16" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.16">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="MvvmLightLibs" Version="5.4.1.1" />
         <PackageReference Include="PropertyChanged.Fody" Version="4.1.0">
@@ -36,7 +36,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Helpers\" />
+        <Folder Include="Helpers\" />
     </ItemGroup>
 
 </Project>

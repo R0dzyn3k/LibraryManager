@@ -5,40 +5,39 @@ using LibraryManager.Data;
 using LibraryManager.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace LibraryManager.Services
+namespace LibraryManager.Services;
+
+public class AuthService : IAuthService
 {
-    public class AuthService : IAuthService
+    private readonly LibraryDbContext _context;
+    private User? _currentUser;
+    private List<User>? _users;
+
+    public AuthService(LibraryDbContext context)
     {
-        private readonly LibraryDbContext _context;
-        private List<User>? _users;
-        private User? _currentUser;
+        _context = context;
+        InitializeUsers();
+    }
 
-        public AuthService(LibraryDbContext context)
-        {
-            _context = context;
-            InitializeUsers();
-        }
+    public Task<bool> LoginAsync(string? username, string? password)
+    {
+        var user = _users?.FirstOrDefault(u => u.Username == username && u.Password == password);
 
-        private async void InitializeUsers()
-        {
-            _users = await _context.Users.AsNoTracking().ToListAsync();
-        }
+        if (user == null)
+            return Task.FromResult(false);
 
-        public Task<bool> LoginAsync(string? username, string? password)
-        {
-            var user = _users?.FirstOrDefault(u => u.Username == username && u.Password == password);
-            
-            if (user == null)
-                return Task.FromResult(false);
-            
-            _currentUser = user;
-            
-            return Task.FromResult(true);
-        }
+        _currentUser = user;
 
-        public void Logout()
-        {
-            _currentUser = null;
-        }
+        return Task.FromResult(true);
+    }
+
+    public void Logout()
+    {
+        _currentUser = null;
+    }
+
+    private async void InitializeUsers()
+    {
+        _users = await _context.Users.AsNoTracking().ToListAsync();
     }
 }

@@ -2,7 +2,7 @@
 
 public interface IValidator<T>
 {
-    ValidationResult Validate(T value);
+    ValidationResult Validate(T? value);
 }
 
 public class ValidationResult

@@ -1,26 +1,24 @@
 ﻿using LibraryManager.Models;
 using Microsoft.EntityFrameworkCore;
 
+namespace LibraryManager.Data;
 
-namespace LibraryManager.Data
+public class LibraryDbContext : DbContext
 {
-    public class LibraryDbContext : DbContext
+    public LibraryDbContext()
     {
-        public LibraryDbContext()
-        {
-            Database.Migrate();
-        }
-        public DbSet<User>? Users { get; set; }
+        Database.Migrate();
+    }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlite("Data Source=LibraryDb.db");
-        }
-        
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            // Here you can configure your model
-        }
-        
+    public DbSet<User>? Users { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.UseSqlite("Data Source=LibraryDb.db");
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        // Here you can configure your model
     }
 }
