@@ -21,8 +21,8 @@ public class RegisterViewModel
     private readonly EmailValidator _emailValidator = new();
     private readonly PhoneValidator _phoneValidator = new();
     private readonly PasswordValidator _passwordValidator = new();
-
-
+    
+    public bool? IsUserExists { get; private set; }
     public event Action? NavigateToLogin;
     private string? _username;
     private string? _password;
@@ -37,7 +37,11 @@ public class RegisterViewModel
         set
         {
             _username = value;
-            _registerCommand.RaiseCanExecuteChanged();
+            Task.Run(async () =>
+            {
+                IsUserExists = await _authService.CheckUserExistsAsync(_username);
+                _registerCommand.RaiseCanExecuteChanged();
+            });
         }
     }
 
@@ -103,7 +107,7 @@ public class RegisterViewModel
         _goToLoginCommand = new RelayCommand(GoToLogin);
     }
 
-    private void Register()
+    private async void Register()
     {
         var canRegister = CanRegister();
         if (!canRegister)
@@ -112,29 +116,34 @@ public class RegisterViewModel
     
         var newUser = new User(Username, Password, FirstName, LastName, Email, Phone);
 
-        Task.Run(() => _authService.RegisterAsync(newUser))
-            .ContinueWith(task =>
-            {
-                if (task.Result)
-                {
-                    NavigateToLogin?.Invoke();
-                }
-                else
-                {
-                    ErrorMessage = "Failed to register user.";
-                }
-            });
+        bool registrationResult = await _authService.RegisterAsync(newUser);
+        
+        if (registrationResult)
+        {
+            NavigateToLogin?.Invoke();
+        }
+        else
+        {
+            ErrorMessage = "Failed to register user.";
+        }
     }
 
     private bool CanRegister()
     {
+        
+        if (IsUserExists == true)
+        {
+            ErrorMessage = "User already exists.";
+            return false;
+        }
+        
         var usernameValidation = _usernameValidator.Validate(Password);
         if (!usernameValidation.IsValid)
         {
             ErrorMessage = usernameValidation.ErrorMessage;
             return false;
         }
-        
+
         var passwordValidation = _passwordValidator.Validate(Password);
         if (!passwordValidation.IsValid)
         {

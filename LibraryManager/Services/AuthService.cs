@@ -50,6 +50,16 @@ public class AuthService : IAuthService
         }
     }
     
+    public async Task<bool> CheckUserExistsAsync(string? username)
+    {
+        if (username == null)
+            return false;
+
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+
+        return user != null;
+    }
+    
     public void Logout()
     {
         _currentUser = null;
