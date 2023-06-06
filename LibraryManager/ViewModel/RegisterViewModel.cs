@@ -3,6 +3,7 @@ using LibraryManager.Services;
 using LibraryManager.Validators;
 using PropertyChanged;
 using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using GalaSoft.MvvmLight.CommandWpf;
 
@@ -14,13 +15,15 @@ public class RegisterViewModel
     private readonly IAuthService _authService;
     private readonly RelayCommand _registerCommand;
     private readonly RelayCommand _goToLoginCommand;
+    private readonly UsernameValidator _usernameValidator = new();
     private readonly FirstNameValidator _firstNameValidator = new();
     private readonly LastNameValidator _lastNameValidator = new();
     private readonly EmailValidator _emailValidator = new();
     private readonly PhoneValidator _phoneValidator = new();
     private readonly PasswordValidator _passwordValidator = new();
 
-    public event Action? NavigateToLogin; 
+
+    public event Action? NavigateToLogin;
     private string? _username;
     private string? _password;
     private string? _firstName;
@@ -102,11 +105,36 @@ public class RegisterViewModel
 
     private void Register()
     {
-        // Implement registration logic here.
+        var canRegister = CanRegister();
+        if (!canRegister)
+            return;
+        
+    
+        var newUser = new User(Username, Password, FirstName, LastName, Email, Phone);
+
+        Task.Run(() => _authService.RegisterAsync(newUser))
+            .ContinueWith(task =>
+            {
+                if (task.Result)
+                {
+                    NavigateToLogin?.Invoke();
+                }
+                else
+                {
+                    ErrorMessage = "Failed to register user.";
+                }
+            });
     }
 
     private bool CanRegister()
     {
+        var usernameValidation = _usernameValidator.Validate(Password);
+        if (!usernameValidation.IsValid)
+        {
+            ErrorMessage = usernameValidation.ErrorMessage;
+            return false;
+        }
+        
         var passwordValidation = _passwordValidator.Validate(Password);
         if (!passwordValidation.IsValid)
         {
@@ -142,6 +170,7 @@ public class RegisterViewModel
             return false;
         }
 
+        ErrorMessage = null;
         return true;
     }
     

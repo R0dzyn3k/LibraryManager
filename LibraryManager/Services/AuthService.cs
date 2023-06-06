@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using LibraryManager.Data;
@@ -31,6 +32,24 @@ public class AuthService : IAuthService
         return Task.FromResult(true);
     }
 
+    public async Task<bool> RegisterAsync(User newUser)
+    {
+        if (_context.Users == null)
+            return false;
+        
+        try
+        {
+            _context.Users.Add(newUser);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return false;
+        }
+    }
+    
     public void Logout()
     {
         _currentUser = null;
@@ -38,6 +57,7 @@ public class AuthService : IAuthService
 
     private async void InitializeUsers()
     {
-        _users = await _context.Users.AsNoTracking().ToListAsync();
+        if (_context.Users != null)
+            _users = await _context.Users.AsNoTracking().ToListAsync();
     }
 }
