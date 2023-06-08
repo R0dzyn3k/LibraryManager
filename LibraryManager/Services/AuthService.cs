@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using LibraryManager.Data;
@@ -20,27 +21,47 @@ public class AuthService : IAuthService
         InitializeUsers();
     }
 
-    public Task<bool> LoginAsync(string? username, string? password)
+    public Role UserRole => _currentUser?.Role ?? Role.Guest;
+
+    private bool _isLoggedIn;
+
+    public bool IsLoggedIn
     {
-        var user = _users?.FirstOrDefault(u => u.Username == username && u.Password == password);
+        get { return _isLoggedIn; }
+        set
+        {
+            if (_isLoggedIn == value) 
+                return;
+            
+            _isLoggedIn = value;
+            OnPropertyChanged(nameof(IsLoggedIn));
+        }
+    }
+    
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    public async Task<bool> LoginAsync(string? username, string? password)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username && u.Password == password);
 
         if (user == null)
-            return Task.FromResult(false);
+            return false;
 
         _currentUser = user;
-
-        return Task.FromResult(true);
+        IsLoggedIn = true;
+        return true;
     }
 
     public async Task<bool> RegisterAsync(User newUser)
     {
         if (_context.Users == null)
             return false;
-        
+
         try
         {
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
+            InitializeUsers();
             return true;
         }
         catch (Exception e)
@@ -49,25 +70,37 @@ public class AuthService : IAuthService
             return false;
         }
     }
-    
+
     public async Task<bool> CheckUserExistsAsync(string? username)
     {
         if (username == null)
             return false;
 
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
-
-        return user != null;
+        var userExists = await _context.Users.AnyAsync(u => u.Username == username).ConfigureAwait(false);
+        
+        return userExists;
     }
-    
+
     public void Logout()
     {
         _currentUser = null;
+        InitializeUsers();
+        IsLoggedIn = false;
     }
 
     private async void InitializeUsers()
     {
         if (_context.Users != null)
             _users = await _context.Users.AsNoTracking().ToListAsync();
+    }
+    
+    public User? GetCurrentUser()
+    {
+        return _currentUser;
+    }
+    
+    protected virtual void OnPropertyChanged(string propertyName)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

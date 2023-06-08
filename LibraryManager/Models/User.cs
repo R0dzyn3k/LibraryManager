@@ -4,8 +4,18 @@ namespace LibraryManager.Models;
 
 public class User
 {
-    [Key]
-    public int Id { get; set; }
+    public User(string username, string password, string firstName, string lastName, string email, string phone)
+    {
+        Username = username;
+        Password = password;
+        FirstName = firstName;
+        LastName = lastName;
+        Email = email;
+        Phone = phone;
+        Role = Role.Guest;
+    }
+
+    [Key] public int Id { get; set; }
 
     public string Username { get; set; }
 
@@ -20,15 +30,4 @@ public class User
     public string Phone { get; set; }
 
     public Role Role { get; set; }
-
-    public User(string username, string password, string firstName, string lastName, string email, string phone)
-    {
-        Username = username;
-        Password = password;
-        FirstName = firstName;
-        LastName = lastName;
-        Email = email;
-        Phone = phone;
-        Role = Role.Guest;
-    }
 }

@@ -1,11 +1,11 @@
-﻿using LibraryManager.Models;
-using LibraryManager.Services;
-using LibraryManager.Validators;
-using PropertyChanged;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using GalaSoft.MvvmLight.CommandWpf;
+using LibraryManager.Models;
+using LibraryManager.Services;
+using LibraryManager.Validators;
+using PropertyChanged;
 
 namespace LibraryManager.ViewModel;
 
@@ -13,23 +13,29 @@ namespace LibraryManager.ViewModel;
 public class RegisterViewModel
 {
     private readonly IAuthService _authService;
-    private readonly RelayCommand _registerCommand;
-    private readonly RelayCommand _goToLoginCommand;
-    private readonly UsernameValidator _usernameValidator = new();
-    private readonly FirstNameValidator _firstNameValidator = new();
-    private readonly LastNameValidator _lastNameValidator = new();
     private readonly EmailValidator _emailValidator = new();
-    private readonly PhoneValidator _phoneValidator = new();
+    private readonly FirstNameValidator _firstNameValidator = new();
+    private readonly RelayCommand _goToLoginCommand;
+    private readonly LastNameValidator _lastNameValidator = new();
     private readonly PasswordValidator _passwordValidator = new();
-    
-    public bool? IsUserExists { get; private set; }
-    public event Action? NavigateToLogin;
-    private string? _username;
-    private string? _password;
+    private readonly PhoneValidator _phoneValidator = new();
+    private readonly RelayCommand _registerCommand;
+    private readonly UsernameValidator _usernameValidator = new();
+    private string? _email;
     private string? _firstName;
     private string? _lastName;
-    private string? _email;
+    private string? _password;
     private string? _phone;
+    private string? _username;
+
+    public RegisterViewModel(IAuthService authService)
+    {
+        _authService = authService;
+        _registerCommand = new RelayCommand(() => RegisterExecuteAsync(), () => CanRegisterExecuteAsync());
+        _goToLoginCommand = new RelayCommand(GoToLogin);
+    }
+
+    private bool? IsUserExists { get; set; }
 
     public string? Username
     {
@@ -37,11 +43,7 @@ public class RegisterViewModel
         set
         {
             _username = value;
-            Task.Run(async () =>
-            {
-                IsUserExists = await _authService.CheckUserExistsAsync(_username);
-                _registerCommand.RaiseCanExecuteChanged();
-            });
+            _registerCommand.RaiseCanExecuteChanged();
         }
     }
 
@@ -99,45 +101,56 @@ public class RegisterViewModel
     public ICommand GoToLoginCommand => _goToLoginCommand;
 
     public string? ErrorMessage { get; private set; }
+    public event Action? NavigateToLogin;
 
-    public RegisterViewModel(IAuthService authService)
+    private async void RegisterExecuteAsync()
     {
-        _authService = authService;
-        _registerCommand = new RelayCommand(Register, CanRegister);
-        _goToLoginCommand = new RelayCommand(GoToLogin);
-    }
-
-    private async void Register()
-    {
-        var canRegister = CanRegister();
+        var canRegister = await CanRegister().ConfigureAwait(false);
         if (!canRegister)
             return;
-        
-    
+
+        if (IsUserExists == true)
+        {
+            ErrorMessage = "User already exists.";
+            return;
+        }
+
         var newUser = new User(Username, Password, FirstName, LastName, Email, Phone);
 
-        bool registrationResult = await _authService.RegisterAsync(newUser);
-        
+        var registrationResult = await _authService.RegisterAsync(newUser);
+
         if (registrationResult)
         {
-            NavigateToLogin?.Invoke();
+            var loginResult = await _authService.LoginAsync(Username, Password);
+            if (loginResult)
+            {
+                NavigateToLogin?.Invoke();
+            }
+            else
+            {
+                ErrorMessage = "Failed to login after registration.";
+            }
         }
         else
-        {
             ErrorMessage = "Failed to register user.";
-        }
+    }
+    
+    private bool CanRegisterExecuteAsync()
+    {
+        return CanRegister().Result;
     }
 
-    private bool CanRegister()
+
+    private async Task<bool> CanRegister()
     {
-        
+        IsUserExists = await _authService.CheckUserExistsAsync(Username).ConfigureAwait(false);
         if (IsUserExists == true)
         {
             ErrorMessage = "User already exists.";
             return false;
         }
-        
-        var usernameValidation = _usernameValidator.Validate(Password);
+    
+        var usernameValidation = _usernameValidator.Validate(Username);
         if (!usernameValidation.IsValid)
         {
             ErrorMessage = usernameValidation.ErrorMessage;
@@ -182,7 +195,7 @@ public class RegisterViewModel
         ErrorMessage = null;
         return true;
     }
-    
+
     private void GoToLogin()
     {
         NavigateToLogin?.Invoke();

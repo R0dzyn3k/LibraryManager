@@ -5,61 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModel="clr-namespace:LibraryManager.ViewModel"
         xmlns:view="clr-namespace:LibraryManager.View"
+        xmlns:services="clr-namespace:LibraryManager.Services"
         mc:Ignorable="d"
         Title="MainWindow" Height="800" Width="1400">
     <Window.DataContext>
         <viewModel:MainWindowViewModel />
     </Window.DataContext>
     <Window.Resources>
-        <Style x:Key="MenuButton" TargetType="Button">
-            <Setter Property="Height" Value="40" />
-            <Setter Property="Margin" Value="15 5" />
-            <Setter Property="Background" Value="#FF2E63" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Foreground" Value="#EAEAEA" />
-            <Setter Property="FontSize" Value="20" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border" BorderBrush="Black" BorderThickness="0"
-                                Background="{TemplateBinding Background}" CornerRadius="5">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <EventTrigger RoutedEvent="Button.MouseEnter">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <ColorAnimation Duration="0:0:0.2" To="#08D9D6"
-                                                        Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
-                                                        Storyboard.TargetName="border" />
-                                        <ColorAnimation Duration="0:0:0.2" To="#252A34"
-                                                        Storyboard.TargetProperty="(Button.Foreground).(SolidColorBrush.Color)" />
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                            <EventTrigger RoutedEvent="Button.MouseLeave">
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <ColorAnimation Duration="0:0:0.2" To="#FF2E63"
-                                                        Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
-                                                        Storyboard.TargetName="border" />
-                                        <ColorAnimation Duration="0:0:0.2" To="#EAEAEA"
-                                                        Storyboard.TargetProperty="(Button.Foreground).(SolidColorBrush.Color)" />
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        <Style TargetType="{x:Type TextBlock}">
-            <Setter Property="FontSize" Value="18" />
-        </Style>
-        <Style TargetType="{x:Type Label}">
-            <Setter Property="FontSize" Value="18" />
-        </Style>
-
+        <services:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <services:UserRoleToVisibilityConverter x:Key="UserRoleToVisibilityConverter" />
         <DataTemplate DataType="{x:Type viewModel:LoginViewModel}">
             <view:LoginView />
         </DataTemplate>
@@ -76,16 +30,44 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <StackPanel Background="#252A34">
-            <Button Content="Dashboard" Style="{StaticResource MenuButton}" Margin="15 30 15 5"
-                    Command="{Binding DashboardCommand}" />
-            <Button Content="Books" Style="{StaticResource MenuButton}" Command="{Binding BooksCommand}" />
-            <Button Content="Bookshelf" Style="{StaticResource MenuButton}" Command="{Binding BookshelfCommand}" />
+        <DockPanel Background="#252A34">
+            <StackPanel DockPanel.Dock="Top">
+                <Button Content="Dashboard" Style="{StaticResource MenuButton}" Margin="15 30 15 5"
+                        Command="{Binding DashboardCommand}"
+                        Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <Button Content="Books" Style="{StaticResource MenuButton}" Command="{Binding BooksCommand}" />
+                <Button Content="Bookshelf" Style="{StaticResource MenuButton}" Command="{Binding BookshelfCommand}"
+                        Visibility="{Binding UserRole, Converter={StaticResource UserRoleToVisibilityConverter}, ConverterParameter=User}" />
+            </StackPanel>
 
-            <!-- <Button Content="Additional Menu 1" Style="{StaticResource MenuButton}" Command="{Binding AdditionalCommand1}" Visibility="{Binding IsAdmin, Converter={StaticResource BoolToVisibilityConverter}}" /> -->
-            <!-- <Button Content="Additional Menu 2" Style="{StaticResource MenuButton}" Command="{Binding AdditionalCommand2}" Visibility="{Binding IsAdmin, Converter={StaticResource BoolToVisibilityConverter}}" /> -->
-        </StackPanel>
+            <StackPanel DockPanel.Dock="Top">
+                <Button Content="Add Book" Style="{StaticResource MenuButton}" Margin="15 30 15 5"
+                        Visibility="{Binding IsAdmin, Converter={StaticResource BoolToVisibilityConverter}}"
+                        Command="{Binding AddBockCommand}" />
+                <Button Content="Add User" Style="{StaticResource MenuButton}" 
+                        Visibility="{Binding IsAdmin, Converter={StaticResource BoolToVisibilityConverter}}"
+                        Command="{Binding AddBockCommand}" />
+            </StackPanel>
 
-        <ContentControl Grid.Column="1" Background="#EAEAEA" Content="{Binding CurrentView}" />
+            <Grid DockPanel.Dock="Bottom" VerticalAlignment="Bottom" Height="110px">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150" />
+                    <ColumnDefinition Width="150" />
+                </Grid.ColumnDefinitions>
+
+                <Button Content="Log out" Style="{StaticResource MenuButton}" HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom" Height="50px" Margin="15px 0 0 30px"
+                        Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}"
+                        Command="{Binding LogoutCommand}" Width="120px" />
+
+                <Button Grid.Column="1" Content="My account" Style="{StaticResource MenuButton}"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom" Height="50px" Margin="0 0 15px 30px" Width="120px"
+                        Command="{Binding MyAccountCommand}" />
+            </Grid>
+        </DockPanel>
+
+        <Frame Grid.Column="1" Background="#EAEAEA" NavigationUIVisibility="Hidden" Content="{Binding CurrentView}" />
+
     </Grid>
 </Window>
