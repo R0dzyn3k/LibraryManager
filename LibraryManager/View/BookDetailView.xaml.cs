@@ -2,7 +2,7 @@
 
 namespace LibraryManager.View;
 
-public partial class BookDetailView : Page
+public partial class BookDetailView : UserControl
 {
     public BookDetailView()
     {

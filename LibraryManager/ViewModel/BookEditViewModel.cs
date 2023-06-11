@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Input;
 using GalaSoft.MvvmLight.CommandWpf;
+using LibraryManager.Data;
 using LibraryManager.Models;
 using LibraryManager.Services;
 using LibraryManager.Validators;
@@ -22,19 +23,38 @@ public class BookEditViewModel : INotifyPropertyChanged
     private readonly TitleValidator _titleValidator = new();
     private string? _author;
     private int _count;
-    private string? _imagePath;
     private string? _publisher;
     private Genre _selectedGenre;
     private string? _summary;
     private string? _title;
 
-    public BookEditViewModel(IBookService bookService)
+    public BookEditViewModel(LibraryDbContext context, BookService bookService)
     {
         _bookService = bookService;
         _saveBookCommand = new RelayCommand(SaveBook, CanSaveBook);
         _clearCommand = new RelayCommand(Clear);
 
         AvailableGenres = _bookService.GetAvailableGenres();
+    }
+    
+    public BookEditViewModel(LibraryDbContext context, BookService bookService, int bookId)
+    {
+        _bookService = bookService;
+        _saveBookCommand = new RelayCommand(SaveBook, CanSaveBook);
+        _clearCommand = new RelayCommand(Clear);
+
+        AvailableGenres = _bookService.GetAvailableGenres();
+
+        var book = _bookService.GetBookById(bookId);
+        if (book != null)
+        {
+            Title = book.Title;
+            Author = book.Author;
+            Publisher = book.Publisher;
+            Count = book.AvailableCount;
+            Summary = book.Summary;
+            SelectedGenre = book.Genre;
+        }
     }
 
     public string? Title
@@ -71,12 +91,6 @@ public class BookEditViewModel : INotifyPropertyChanged
     {
         get => _selectedGenre;
         set => SetProperty(ref _selectedGenre, value, nameof(SelectedGenre));
-    }
-
-    public string? ImagePath
-    {
-        get => _imagePath;
-        set => SetProperty(ref _imagePath, value, nameof(ImagePath));
     }
 
     public List<Genre> AvailableGenres { get; }
@@ -151,14 +165,16 @@ public class BookEditViewModel : INotifyPropertyChanged
 
     private void SaveBook()
     {
-        var newBook = new Book(Title!, Author!, Publisher!, Count, SelectedGenre, Summary!, ImagePath);
+        var newBook = new Book(Title!, Author!, Publisher!, Count, Count, SelectedGenre, Summary!);
 
         var success = _bookService.SaveBook(newBook);
 
         if (success)
         {
             SetMessage(MessageType.Success, "Book saved successfully.");
-            BookSaved?.Invoke(this, EventArgs.Empty);
+            var newBookId = newBook.Id;
+            Clear();
+            BookSaved?.Invoke(newBookId);
         }
         else
         {
@@ -174,7 +190,6 @@ public class BookEditViewModel : INotifyPropertyChanged
         Count = 0;
         Summary = null;
         SelectedGenre = 0;
-        ImagePath = null;
 
         ClearForm?.Invoke();
     }
@@ -197,6 +212,6 @@ public class BookEditViewModel : INotifyPropertyChanged
         Message = null;
     }
 
-    public event EventHandler? BookSaved;
+    public event Action<int>? BookSaved;
     public event Action? ClearForm;
 }

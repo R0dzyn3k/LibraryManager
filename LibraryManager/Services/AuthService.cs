@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Threading.Tasks;
 using LibraryManager.Data;
 using LibraryManager.Models;
@@ -13,6 +12,8 @@ public class AuthService : IAuthService
 {
     private readonly LibraryDbContext _context;
     private User? _currentUser;
+
+    private bool _isLoggedIn;
     private List<User>? _users;
 
     public AuthService(LibraryDbContext context)
@@ -23,22 +24,18 @@ public class AuthService : IAuthService
 
     public Role UserRole => _currentUser?.Role ?? Role.Guest;
 
-    private bool _isLoggedIn;
-
     public bool IsLoggedIn
     {
-        get { return _isLoggedIn; }
+        get => _isLoggedIn;
         set
         {
-            if (_isLoggedIn == value) 
+            if (_isLoggedIn == value)
                 return;
-            
+
             _isLoggedIn = value;
             OnPropertyChanged(nameof(IsLoggedIn));
         }
     }
-    
-    public event PropertyChangedEventHandler PropertyChanged;
 
     public async Task<bool> LoginAsync(string? username, string? password)
     {
@@ -77,7 +74,7 @@ public class AuthService : IAuthService
             return false;
 
         var userExists = await _context.Users.AnyAsync(u => u.Username == username).ConfigureAwait(false);
-        
+
         return userExists;
     }
 
@@ -88,17 +85,19 @@ public class AuthService : IAuthService
         IsLoggedIn = false;
     }
 
+    public User? GetCurrentUser()
+    {
+        return _currentUser;
+    }
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
     private async void InitializeUsers()
     {
         if (_context.Users != null)
             _users = await _context.Users.AsNoTracking().ToListAsync();
     }
-    
-    public User? GetCurrentUser()
-    {
-        return _currentUser;
-    }
-    
+
     protected virtual void OnPropertyChanged(string propertyName)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

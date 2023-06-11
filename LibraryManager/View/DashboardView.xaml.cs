@@ -2,7 +2,7 @@
 
 namespace LibraryManager.View;
 
-public partial class DashboardView : Page
+public partial class DashboardView : UserControl
 {
     public DashboardView()
     {

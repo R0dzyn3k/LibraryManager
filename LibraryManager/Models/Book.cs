@@ -4,17 +4,20 @@ namespace LibraryManager.Models;
 
 public class Book
 {
-    public Book(string title, string author, string publisher, int count, Genre genre, string summary,
-        string? imagePath)
+    public Book()
+    {
+    }
+
+    public Book(string title, string author, string publisher, int totalCount, int availableCount, Genre genre,
+        string summary)
     {
         Title = title;
         Author = author;
         Publisher = publisher;
         Genre = genre;
         Summary = summary;
-        ImagePath = imagePath;
-        TotalCount = count;
-        AvailableCount = count;
+        TotalCount = totalCount;
+        AvailableCount = availableCount;
     }
 
     [Key] public int Id { get; set; }
@@ -27,8 +30,6 @@ public class Book
     public Genre Genre { get; set; }
 
     public string Summary { get; set; }
-
-    public string? ImagePath { get; set; }
 
     public int TotalCount { get; set; }
 

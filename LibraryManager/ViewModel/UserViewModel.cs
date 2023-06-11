@@ -1,82 +1,81 @@
 ﻿using System.ComponentModel;
 using LibraryManager.Models;
 
-namespace LibraryManager.ViewModel
+namespace LibraryManager.ViewModel;
+
+public class UserViewModel : INotifyPropertyChanged
 {
-    public class UserViewModel : INotifyPropertyChanged
+    private readonly User _user;
+
+    public UserViewModel(User user)
     {
-        private User _user;
+        _user = user;
+    }
 
-        public UserViewModel(User user)
+    public string Username
+    {
+        get => _user.Username;
+        set
         {
-            _user = user;
+            _user.Username = value;
+            OnPropertyChanged(nameof(Username));
         }
+    }
 
-        public string Username
+    public string FirstName
+    {
+        get => _user.FirstName;
+        set
         {
-            get { return _user.Username; }
-            set
-            {
-                _user.Username = value;
-                OnPropertyChanged(nameof(Username));
-            }
+            _user.FirstName = value;
+            OnPropertyChanged(nameof(FirstName));
         }
+    }
 
-        public string FirstName
+    public string LastName
+    {
+        get => _user.LastName;
+        set
         {
-            get { return _user.FirstName; }
-            set
-            {
-                _user.FirstName = value;
-                OnPropertyChanged(nameof(FirstName));
-            }
+            _user.LastName = value;
+            OnPropertyChanged(nameof(LastName));
         }
+    }
 
-        public string LastName
+    public string Email
+    {
+        get => _user.Email;
+        set
         {
-            get { return _user.LastName; }
-            set
-            {
-                _user.LastName = value;
-                OnPropertyChanged(nameof(LastName));
-            }
+            _user.Email = value;
+            OnPropertyChanged(nameof(Email));
         }
+    }
 
-        public string Email
+    public string Phone
+    {
+        get => _user.Phone;
+        set
         {
-            get { return _user.Email; }
-            set
-            {
-                _user.Email = value;
-                OnPropertyChanged(nameof(Email));
-            }
+            _user.Phone = value;
+            OnPropertyChanged(nameof(Phone));
         }
+    }
 
-        public string Phone
+    public Role UserRole
+    {
+        get => _user.Role;
+        set
         {
-            get { return _user.Phone; }
-            set
-            {
-                _user.Phone = value;
-                OnPropertyChanged(nameof(Phone));
-            }
+            _user.Role = value;
+            OnPropertyChanged(nameof(UserRole));
         }
+    }
 
-        public Role UserRole
-        {
-            get { return _user.Role; }
-            set
-            {
-                _user.Role = value;
-                OnPropertyChanged(nameof(UserRole));
-            }
-        }
+    public event PropertyChangedEventHandler? PropertyChanged;
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+    protected virtual void OnPropertyChanged(string propertyName)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

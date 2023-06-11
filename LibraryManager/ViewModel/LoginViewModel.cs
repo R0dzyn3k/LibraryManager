@@ -69,7 +69,7 @@ public class LoginViewModel
             return false;
         }
 
-        
+
         return true;
     }
 
@@ -82,7 +82,9 @@ public class LoginViewModel
             ErrorMessage = _authService.IsLoggedIn ? "True" : "False";
         }
         else
+        {
             ErrorMessage = "Invalid login credentials.";
+        }
     }
 
     private void GoToRegister()

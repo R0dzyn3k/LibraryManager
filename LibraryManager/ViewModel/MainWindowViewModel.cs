@@ -11,13 +11,56 @@ namespace LibraryManager.ViewModel;
 
 public class MainWindowViewModel : INotifyPropertyChanged
 {
-    private AuthService _authService;
+    private readonly AuthService _authService;
+    private readonly BookService _bookService;
     private readonly LibraryDbContext _dbContext;
     private object _currentView;
+    private bool _isAdmin;
+    private bool _isLoggedIn;
+
+    public MainWindowViewModel()
+    {
+        _dbContext = new LibraryDbContext();
+        _dbContext.Database.Migrate();
+
+        _authService = new AuthService(_dbContext);
+        _authService.PropertyChanged += AuthServiceOnPropertyChanged;
+        _bookService = new BookService(new BookRepository(_dbContext));
+
+        LogoutCommand = new RelayCommand(Logout);
+        MyAccountCommand = new RelayCommand(MyAccount);
+        BooksCommand = new RelayCommand(ShowBooks);
+
+        LoginViewModel = new LoginViewModel(_authService);
+        LoginViewModel.LoginSuccess += OnLoginSuccess;
+        LoginViewModel.NavigateToRegister += OnNavigateToRegister;
+
+        RegisterViewModel = new RegisterViewModel(_authService);
+        RegisterViewModel.NavigateToLogin += OnNavigateToLogin;
+        RegisterCommand = new RelayCommand(() => CurrentView = RegisterViewModel);
+
+        AddBookCommand = new RelayCommand(AddBook);
+
+        DashboardCommand = new RelayCommand(ShowDashboard);
+
+        CurrentView = LoginViewModel;
+    }
 
     public RelayCommand LogoutCommand { get; private set; }
 
     public RelayCommand MyAccountCommand { get; private set; }
+
+    public RelayCommand DashboardCommand { get; private set; }
+
+    public LoginViewModel LoginViewModel { get; set; }
+
+    public RegisterViewModel RegisterViewModel { get; set; }
+
+    public RelayCommand RegisterCommand { get; private set; }
+
+    public RelayCommand AddBookCommand { get; private set; }
+
+    public RelayCommand BooksCommand { get; private set; }
 
     public object CurrentView
     {
@@ -29,29 +72,19 @@ public class MainWindowViewModel : INotifyPropertyChanged
         }
     }
 
-    public LoginViewModel LoginViewModel { get; set; }
-
-    public RegisterViewModel RegisterViewModel { get; set; }
-
-    public RelayCommand RegisterCommand { get; private set; }
-
-    private bool _isLoggedIn;
-
     public bool IsLoggedIn
     {
-        get { return _isLoggedIn; }
+        get => _isLoggedIn;
         private set
         {
             _isLoggedIn = value;
             OnPropertyChanged(nameof(IsLoggedIn));
         }
     }
-    
-    private bool _isAdmin;
 
     public bool IsAdmin
     {
-        get { return _isAdmin; }
+        get => _isAdmin;
         private set
         {
             _isAdmin = value;
@@ -61,29 +94,6 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public MainWindowViewModel()
-    {
-        _dbContext = new LibraryDbContext();
-        _dbContext.Database.Migrate();
-
-        _authService = new AuthService(_dbContext);
-        _authService.PropertyChanged += AuthServiceOnPropertyChanged;
-        
-        LogoutCommand = new RelayCommand(Logout);
-        MyAccountCommand = new RelayCommand(MyAccount);
-
-        LoginViewModel = new LoginViewModel(_authService);
-        LoginViewModel.LoginSuccess += OnLoginSuccess;
-        LoginViewModel.NavigateToRegister += OnNavigateToRegister;
-
-        RegisterViewModel = new RegisterViewModel(_authService);
-        RegisterViewModel.NavigateToLogin += OnNavigateToLogin;
-
-        RegisterCommand = new RelayCommand(() => CurrentView = RegisterViewModel);
-
-        CurrentView = LoginViewModel;
-    }
-
     protected virtual void OnPropertyChanged(string propertyName)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -91,8 +101,9 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
     private void OnLoginSuccess(object sender, EventArgs e)
     {
-        // Przełącz na inną stronę po pomyślnym zalogowaniu
-        // CurrentView = new SomeOtherViewModel();
+        var dashboardView = new DashboardView();
+        dashboardView.DataContext = new DashboardViewModel(_authService);
+        CurrentView = dashboardView;
     }
 
     private void OnNavigateToRegister()
@@ -110,7 +121,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
         _authService.Logout();
         CurrentView = LoginViewModel;
     }
-    
+
     private void AuthServiceOnPropertyChanged(object sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(AuthService.IsLoggedIn))
@@ -120,19 +131,19 @@ public class MainWindowViewModel : INotifyPropertyChanged
             UpdateIsAdmin();
         }
     }
-    
+
     private void UpdateIsAdmin()
     {
         IsAdmin = _authService.UserRole == Role.Admin;
     }
-    
+
     private void MyAccount()
     {
-        User? user = _authService.GetCurrentUser();
-        
+        var user = _authService.GetCurrentUser();
+
         if (IsLoggedIn && user != null)
         {
-            UserView userView = new UserView();
+            var userView = new UserView();
             userView.DataContext = user;
             CurrentView = userView;
         }
@@ -140,5 +151,48 @@ public class MainWindowViewModel : INotifyPropertyChanged
         {
             CurrentView = LoginViewModel;
         }
+    }
+
+    private void ShowDashboard()
+    {
+        var dashboardView = new DashboardView();
+        dashboardView.DataContext = new DashboardViewModel(_authService);
+        CurrentView = dashboardView;
+    }
+
+    private void AddBook()
+    {
+        var bookEditView = new BookEditView();
+        var bookEditViewModel = new BookEditViewModel(_dbContext, _bookService);
+        bookEditViewModel.BookSaved += NavigateToBookDetail;
+        bookEditView.DataContext = bookEditViewModel;
+        CurrentView = bookEditView;
+    }
+
+    private void ShowBooks()
+    {
+        var bookListView = new BookListView();
+        var bookListViewModel = new BookListViewModel(_bookService, _authService);
+        bookListViewModel.NavigateToBookDetails += NavigateToBookDetail;
+        bookListViewModel.NavigateToBookEdit += NavigateToBookEdit;
+        bookListView.DataContext = bookListViewModel;
+        CurrentView = bookListView;
+    }
+
+    public void NavigateToBookDetail(int id)
+    {
+        var bookDetailView = new BookDetailView();
+        var bookDetailViewModel = new BookDetailViewModel(_bookService, id);
+        bookDetailView.DataContext = bookDetailViewModel;
+        CurrentView = bookDetailView;
+    }
+
+    private void NavigateToBookEdit(int id)
+    {
+        var bookEditView = new BookEditView();
+        var bookEditViewModel = new BookEditViewModel(_dbContext, _bookService, id);
+        bookEditViewModel.BookSaved += NavigateToBookDetail;
+        bookEditView.DataContext = bookEditViewModel;
+        CurrentView = bookEditView;
     }
 }

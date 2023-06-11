@@ -2,7 +2,7 @@
 
 namespace LibraryManager.View;
 
-public partial class UserView : Page
+public partial class UserView : UserControl
 {
     public UserView()
     {

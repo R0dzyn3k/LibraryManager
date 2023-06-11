@@ -36,17 +36,12 @@
                         Command="{Binding DashboardCommand}"
                         Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}" />
                 <Button Content="Books" Style="{StaticResource MenuButton}" Command="{Binding BooksCommand}" />
-                <Button Content="Bookshelf" Style="{StaticResource MenuButton}" Command="{Binding BookshelfCommand}"
-                        Visibility="{Binding UserRole, Converter={StaticResource UserRoleToVisibilityConverter}, ConverterParameter=User}" />
             </StackPanel>
 
             <StackPanel DockPanel.Dock="Top">
                 <Button Content="Add Book" Style="{StaticResource MenuButton}" Margin="15 30 15 5"
                         Visibility="{Binding IsAdmin, Converter={StaticResource BoolToVisibilityConverter}}"
-                        Command="{Binding AddBockCommand}" />
-                <Button Content="Add User" Style="{StaticResource MenuButton}" 
-                        Visibility="{Binding IsAdmin, Converter={StaticResource BoolToVisibilityConverter}}"
-                        Command="{Binding AddBockCommand}" />
+                        Command="{Binding AddBookCommand}" />
             </StackPanel>
 
             <Grid DockPanel.Dock="Bottom" VerticalAlignment="Bottom" Height="110px">

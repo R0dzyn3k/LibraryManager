@@ -1,37 +1,38 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using LibraryManager.Data;
 using LibraryManager.Models;
 
 namespace LibraryManager.Services;
 
 public class BookRepository : IBookRepository
 {
-    private readonly List<Book> _books;
+    private readonly LibraryDbContext _context;
 
-    public BookRepository()
+    public BookRepository(LibraryDbContext context)
     {
-        _books = new List<Book>();
+        _context = context;
     }
 
     public List<Book> GetAllBooks()
     {
-        return _books.ToList();
+        return _context.Books.ToList();
     }
 
     public Book? GetBookById(int id)
     {
-        return _books.FirstOrDefault(b => b.Id == id) ?? null;
+        return _context.Books.FirstOrDefault(b => b.Id == id);
     }
 
     public bool SaveBook(Book book)
     {
         if (book.Id == 0)
         {
-            _books.Add(book);
+            _context.Books.Add(book);
         }
         else
         {
-            var existingBook = _books.FirstOrDefault(b => b.Id == book.Id);
+            var existingBook = _context.Books.FirstOrDefault(b => b.Id == book.Id);
             if (existingBook == null) return false;
 
             existingBook.Title = book.Title;
@@ -42,12 +43,17 @@ public class BookRepository : IBookRepository
             existingBook.Genre = book.Genre;
         }
 
+        _context.SaveChanges();
         return true;
     }
 
     public void DeleteBook(int id)
     {
-        var book = _books.FirstOrDefault(b => b.Id == id);
-        if (book != null) _books.Remove(book);
+        var book = _context.Books.FirstOrDefault(b => b.Id == id);
+        if (book != null)
+        {
+            _context.Books.Remove(book);
+            _context.SaveChanges();
+        }
     }
 }

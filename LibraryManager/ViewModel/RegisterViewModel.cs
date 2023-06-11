@@ -123,18 +123,16 @@ public class RegisterViewModel
         {
             var loginResult = await _authService.LoginAsync(Username, Password);
             if (loginResult)
-            {
                 NavigateToLogin?.Invoke();
-            }
             else
-            {
                 ErrorMessage = "Failed to login after registration.";
-            }
         }
         else
+        {
             ErrorMessage = "Failed to register user.";
+        }
     }
-    
+
     private bool CanRegisterExecuteAsync()
     {
         return CanRegister().Result;
@@ -149,7 +147,7 @@ public class RegisterViewModel
             ErrorMessage = "User already exists.";
             return false;
         }
-    
+
         var usernameValidation = _usernameValidator.Validate(Username);
         if (!usernameValidation.IsValid)
         {
